@@ -12,8 +12,8 @@ class Ticket extends \Eloquent implements StatefulInterface
     use FiniteStateMachine, FiniteAuditTrail, SoftDeletingTrait;
 
     const
-        STATE_INITIAL = 'draft',
-        STATE_FINAL = 'complete';
+        STATE_INITIAL = 'DRA',
+        STATE_FINAL = 'COM';
 
     protected $table = 'tickets';
 
@@ -44,13 +44,6 @@ class Ticket extends \Eloquent implements StatefulInterface
     {
         return static::STATE_INITIAL;
     }
-
-    public static $statuses = [
-        'ASS' => 'Assessing',
-        'SRC' => 'Sourcing',
-        'PRI' => 'Pricing',
-        'CLS' => 'Closed'
-    ];
 
     public static function transitionLabel($name)
     {
@@ -91,80 +84,80 @@ class Ticket extends \Eloquent implements StatefulInterface
             //'class'       => get_class(),//useful?
             'graph'       => 'TicketStateMachine',
             'states'      => [
-                'draft'             => [
+                'DRA'             => [
                     'type'       => 'initial',
-                    'properties' => ['deletable' => true, 'editable' => true],
+                    'properties' => ['label' => 'Draft', 'deletable' => true, 'editable' => true],
                 ],
-                'in review'         => [
+                'REV'         => [
                     'type'       => 'normal',
-                    'properties' => ['deletable' => true, 'editable' => true],
+                    'properties' => ['label' => 'In Review', 'deletable' => true, 'editable' => true],
                 ],
-                'pending input'     => [
+                'INP'     => [
                     'type'       => 'normal',
-                    'properties' => ['deletable' => true, 'editable' => true],
+                    'properties' => ['label' => 'Pending Input', 'deletable' => true, 'editable' => true],
                 ],
-                'resubmitted'       => [
+                'RSB'       => [
                     'type'       => 'normal',
-                    'properties' => [],
+                    'properties' => ['label' => 'Resubmitted'],
                 ],
-                'sourcing'          => [
+                'SRC'          => [
                     'type'       => 'normal',
-                    'properties' => ['deletable' => true, 'editable' => true],
+                    'properties' => ['label' => 'Sourcing', 'deletable' => true, 'editable' => true],
                 ],
-                'drafting proposal' => [
+                'PRP' => [
                     'type'       => 'normal',
-                    'properties' => ['deletable' => true, 'editable' => true],
+                    'properties' => ['label' => 'Drafting Proposal', 'deletable' => true, 'editable' => true],
                 ],
-                'pending approval'  => [
+                'APP'  => [
                     'type'       => 'normal',
-                    'properties' => ['deletable' => true, 'editable' => true],
+                    'properties' => ['label' => 'Pending Approval', 'deletable' => true, 'editable' => true],
                 ],
-                'cataloguing'       => [
+                'CAT'       => [
                     'type'       => 'normal',
-                    'properties' => ['deletable' => true, 'editable' => true],
+                    'properties' => ['label' => 'Cataloguing', 'deletable' => true, 'editable' => true],
                 ],
-                'complete'          => [
+                'COM'          => [
                     'type'       => 'final',
-                    'properties' => ['deletable' => false, 'editable' => true],
+                    'properties' => ['label' => 'Complete', 'deletable' => false, 'editable' => true],
                 ],
-                'closed'            => [
+                'CLS'            => [
                     'type'       => 'final',
-                    'properties' => [],
+                    'properties' => ['label' => 'Closed'],
                 ]
             ],
             'transitions' => [
-                'save draft'                          => ['from' => ['draft'], 'to' => 'draft'],
-                'submit request'                      => ['from' => ['draft'], 'to' => 'in review'],
-                'cancel draft'                        => ['from' => ['draft'], 'to' => 'closed'],
+                'save draft'                          => ['from' => ['DRA'], 'to' => 'DRA'],
+                'submit request'                      => ['from' => ['DRA'], 'to' => 'REV'],
+                'cancel draft'                        => ['from' => ['DRA'], 'to' => 'CLS'],
 
-                'reassign to requester'               => ['from' => ['in review'], 'to' => 'pending input'],
-                'submit for sourcing'                 => ['from' => ['in review'], 'to' => 'sourcing'],
-                'close request in review'             => ['from' => ['in review'], 'to' => 'closed'],
+                'reassign to requester'               => ['from' => ['REV'], 'to' => 'INP'],
+                'submit for sourcing'                 => ['from' => ['REV'], 'to' => 'SRC'],
+                'close request in review'             => ['from' => ['REV'], 'to' => 'CLS'],
 
-                'resubmit'                            => ['from' => ['pending input'], 'to' => 'resubmitted'],
-                'cancel request pending input'        => ['from' => ['pending input'], 'to' => 'closed'],
+                'resubmit'                            => ['from' => ['INP'], 'to' => 'RSB'],
+                'cancel request pending input'        => ['from' => ['INP'], 'to' => 'CLS'],
 
-                'submit for proposal'                 => ['from' => ['sourcing'], 'to' => 'drafting proposal'],
-                'reassign to reviewer from sourcing'  => ['from' => ['sourcing'], 'to' => 'in review'],
-                'reassign to requester from sourcing' => ['from' => ['sourcing'], 'to' => 'pending input'],
-                'close request in sourcing'           => ['from' => ['sourcing'], 'to' => 'closed'],
+                'submit for proposal'                 => ['from' => ['SRC'], 'to' => 'PRP'],
+                'reassign to reviewer from sourcing'  => ['from' => ['SRC'], 'to' => 'REV'],
+                'reassign to requester from sourcing' => ['from' => ['SRC'], 'to' => 'INP'],
+                'close request in sourcing'           => ['from' => ['SRC'], 'to' => 'CLS'],
 
-                'submit proposal'                     => ['from' => ['drafting proposal'], 'to' => 'pending approval'],
-                'close request in proposal'           => ['from' => ['drafting proposal'], 'to' => 'close'],
+                'submit proposal'                     => ['from' => ['PRP'], 'to' => 'APP'],
+                'close request in proposal'           => ['from' => ['PRP'], 'to' => 'CLS'],
 
-                'approve'                             => ['from' => ['pending approval'], 'to' => 'complete'],
-                'reject'                              => ['from' => ['pending approval'], 'to' => 'drafting proposal'],
-                'close request pending approval'      => ['from' => ['pending approval'], 'to' => 'closed'],
+                'approve'                             => ['from' => ['APP'], 'to' => 'COM'],
+                'reject'                              => ['from' => ['APP'], 'to' => 'PRP'],
+                'close request pending approval'      => ['from' => ['APP'], 'to' => 'CLS'],
             ],
             'callbacks'   => [
                 'before' => [
                     ['on' => 'save draft', 'do' => [$this, 'beforeTransitionT12']],
                     ['on' => 'resubmit', 'do' => [$this, 'beforeResubmit']],
-                    ['from' => 'in review', 'to' => 'sourcing', 'do' => function ($myStatefulInstance, $transitionEvent) {
+                    ['from' => 'REV', 'to' => 'SRC', 'do' => function ($myStatefulInstance, $transitionEvent) {
 //                        echo "Before callback from 's2' to 's3'";// debug
                         Log::info("Before callback from 's2' to 's3'");// debug
                     }],
-                    ['from' => '-complete', 'to' => ['sourcing', 'drafting proposal'], 'do' => [$this, 'fromStatesS1S2ToS1S3']],
+                    ['from' => '-complete', 'to' => ['SRC', 'PRP'], 'do' => [$this, 'fromStatesS1S2ToS1S3']],
                 ],
                 'after'  => [
                     ['on' => 'resubmit', 'do' => [$this, 'afterResubmitted']],
@@ -201,12 +194,12 @@ class Ticket extends \Eloquent implements StatefulInterface
     {
         Log::info("Function called after transition: '" . $transitionEvent->getTransition()->getName() . "' !");
         Log::info('Current state: ' . $myStatefulInstance->getCurrentState());
-        if ($this->lastState === 'sourcing') {
-            $myStatefulInstance->getStateMachine()->addTransition('reassign to sourcing', 'resubmitted', 'sourcing');
+        if ($this->lastState === 'SRC') {
+            $myStatefulInstance->getStateMachine()->addTransition('reassign to sourcing', 'RSB', 'SRC');
             $myStatefulInstance->apply('reassign to sourcing');
         }
-        if ($this->lastState === 'in review') {
-            $myStatefulInstance->getStateMachine()->addTransition('reassign to review', 'resubmitted', 'in review');
+        if ($this->lastState === 'REV') {
+            $myStatefulInstance->getStateMachine()->addTransition('reassign to review', 'RSB', 'REV');
             $myStatefulInstance->apply('reassign to review');
         }
         Log::info('New state: ' . $myStatefulInstance->getCurrentState());

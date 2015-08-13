@@ -19,7 +19,7 @@
                     <tr>
                         <td>{{ $ticket->id }}</td>
                         <td><a href="/tickets/{{$ticket->id}}/edit">{{ $ticket->title }}</a></td>
-                        <td>{{ $ticket->state }}</td>
+                        <td>{{ $ticket->getProperties()['label'] }}</td>
                         <td>{{ $ticket->created_at }}</td>
                         <td>
                             {{ Form::open(['route' => ['tickets.destroy', $ticket->id], 'method' => 'DELETE']) }}
