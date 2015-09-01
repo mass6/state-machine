@@ -19,6 +19,7 @@ class CreateTicketsTable extends Migration {
 			$table->text('body');
             $table->string('state')->nullable();
             $table->integer('user_id')->unsigned()->nullable();
+            $table->integer('num_approvals')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

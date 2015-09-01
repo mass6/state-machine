@@ -17,8 +17,8 @@
         {{ Form::textarea('body', null, ['class' => 'form-control']) }}
 
         <!-- Status Form Input -->
-        {{ Form::label('state', 'State:') }}
-        {{ Form::select('state', $transitions, null, ['class' => 'form-control', 'id' => 'state_input']) }}
+        {{ Form::label('transition', 'Transition:') }}
+        {{ Form::select('transition', $transitions, null, ['class' => 'form-control', 'id' => 'transition_input']) }}
 
 
         <!-- Submit button -->

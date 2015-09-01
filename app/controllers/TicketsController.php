@@ -121,19 +121,19 @@ class TicketsController extends \BaseController {
         $ticket = Ticket::findOrFail($id);
 
         $input = Input::all();
-        $transitionName = $input['state'];
-        $nextState = (string) $ticket->getStateMachine()->getTransition($transitionName)->getState();
-        $currentState = (string) $ticket->getCurrentState();
-        if ($currentState !== $nextState) {
-            $ticket->apply($transitionName);
-            if ($nextState == 'closed') {
-                $ticket->delete();
+        $transitionName = $input['transition'];
+        $ticket->apply($transitionName);
 
-                return Redirect::route('tickets.index');
-            }
-        }
-
-        $input['state'] = $ticket->getCurrentState();
+//        $nextState = (string) $ticket->getStateMachine()->getTransition($transitionName)->getState();
+//        $currentState = (string) $ticket->getCurrentState();
+//        if ($currentState !== $nextState) {
+//            $ticket->apply($transitionName);
+//            if ($nextState == 'closed') {
+//                $ticket->delete();
+//
+//                return Redirect::route('tickets.index');
+//            }
+//        }
 
         $ticket->update($input);
 

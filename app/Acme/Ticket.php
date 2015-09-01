@@ -68,6 +68,7 @@ class Ticket extends \Eloquent implements StatefulInterface
             'close request in proposal'           => 'close',
 
             'approve'                             => 'approve',
+            'final_approve'                       => 'final approve',
             'reject'                              => 'reject',
             'close request pending approval'      => 'close',
         ];
@@ -145,7 +146,8 @@ class Ticket extends \Eloquent implements StatefulInterface
                 'submit proposal'                     => ['from' => ['PRP'], 'to' => 'APP'],
                 'close request in proposal'           => ['from' => ['PRP'], 'to' => 'CLS'],
 
-                'approve'                             => ['from' => ['APP'], 'to' => 'COM'],
+                'approve'                             => ['from' => ['APP'], 'to' => 'APP'],
+                'final_approve'                       => ['from' => ['APP'], 'to' => 'COM'],
                 'reject'                              => ['from' => ['APP'], 'to' => 'PRP'],
                 'close request pending approval'      => ['from' => ['APP'], 'to' => 'CLS'],
             ],
@@ -161,10 +163,20 @@ class Ticket extends \Eloquent implements StatefulInterface
                 ],
                 'after'  => [
                     ['on' => 'resubmit', 'do' => [$this, 'afterResubmitted']],
+                    ['on' => 'submit request', 'do' => [$this, 'afterSubmitted']],
+                    ['on' => 'approve', 'do' => [$this, 'afterApprove']],
                     ['from' => 'all', 'to' => 'all', 'do' => [$this, 'afterAllTransitions']],
                 ],
             ],
         ];
+    }
+
+    public function afterApprove($myStatefulInstance, $transitionEvent)
+    {
+        $this->num_approvals ++;
+        if ($this->num_approvals >= 2) {
+            $this->apply('final_approve');
+        }
     }
 
     public function beforeTransitionT12($myStatefulInstance, $transitionEvent)

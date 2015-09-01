@@ -61,6 +61,7 @@ trait FiniteStateMachine
     public function setFiniteState($state)
     {
         $this->state = $state;
+        $this->attributes['state'] = $state;
     }
 
     /**
